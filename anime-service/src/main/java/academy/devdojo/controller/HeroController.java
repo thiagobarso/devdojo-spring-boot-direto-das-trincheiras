@@ -1,6 +1,8 @@
 package academy.devdojo.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class HeroController {
     @GetMapping("{name}")
     public String findByName(@PathVariable String name){
         return HEROES.stream().filter(hero -> hero.equalsIgnoreCase(name))
-                .findFirst().orElse("");
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Hero not Found"));
     }
 }
