@@ -1,39 +1,34 @@
 package academy.devdojo.controller;
 
-import academy.devdojo.domain.Producer;
 import academy.devdojo.mapper.ProducerMapper;
 import academy.devdojo.request.ProducerPostRequest;
 import academy.devdojo.request.ProducerPutRequest;
 import academy.devdojo.response.ProducerGetResponse;
 import academy.devdojo.response.ProducerPostResponse;
 import academy.devdojo.service.ProducerService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("v1/producers")
 @Slf4j
+@RequiredArgsConstructor
 public class ProducerController {
 
-    private static final ProducerMapper MAPPER = ProducerMapper.INSTANCE;
-    private ProducerService service;
-
-    public ProducerController() {
-        this.service = new ProducerService();
-    }
+    private  final ProducerMapper mapper;
+    private final ProducerService service;
 
     @GetMapping
     public ResponseEntity<List<ProducerGetResponse>> listAll(@RequestParam(required = false) String name) {
         log.debug("Request received to list all producers, param name :'{}'", name);
         var producers = service.findAll(name);
-        var producerGetResponses = MAPPER.toProducerGetResponseList(producers);
+        var producerGetResponses = mapper.toProducerGetResponseList(producers);
         return ResponseEntity.ok(producerGetResponses);
     }
 
@@ -43,7 +38,7 @@ public class ProducerController {
 
         var producer = service.findByIdOrThrowNotFound(id);
 
-        var producerGetResponse = MAPPER.toProducerGetResponse(producer);
+        var producerGetResponse = mapper.toProducerGetResponse(producer);
 
         return ResponseEntity.ok(producerGetResponse);
     }
@@ -52,9 +47,9 @@ public class ProducerController {
             headers = "x-api-key=1234")
     public ResponseEntity<ProducerPostResponse> save(@RequestBody ProducerPostRequest producerPostRequest, @RequestHeader HttpHeaders headers) {
         log.info("{}", headers);
-        var producer = MAPPER.toProducer(producerPostRequest);
+        var producer = mapper.toProducer(producerPostRequest);
         var producerSaved = service.save(producer);
-        var producerGetResponse = MAPPER.toProducerPostResponse(producerSaved);
+        var producerGetResponse = mapper.toProducerPostResponse(producerSaved);
         return ResponseEntity.ok(producerGetResponse);
     }
 
@@ -68,7 +63,7 @@ public class ProducerController {
     @PutMapping
     public ResponseEntity<Void> update(@RequestBody ProducerPutRequest request) {
         log.debug("Request to update producer by id: {}", request);
-        var producerToUpdate = MAPPER.toProducer(request);
+        var producerToUpdate = mapper.toProducer(request);
         service.update(producerToUpdate);
         return ResponseEntity.noContent().build();
     }
